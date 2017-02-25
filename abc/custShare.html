@@ -1,0 +1,71 @@
+<script type="text/javascript">
+  if (window.WeiboJSBridge) {
+      initMenu();
+  } else {
+    document.addEventListener('WeiboJSBridgeReady', function() {
+      initMenu();
+    });
+  }
+
+  function initMenu() {
+    var opts = {};
+    opts.content = {
+      icon: window.$ShareContent.icon || 'http://ww2.sinaimg.cn/large/005FfUQ6jw1facihsxbjaj30hs0c8n0e.jpg',
+      title: window.$ShareContent.title || 'title',
+      desc: window.$ShareContent.desc || 'desc'
+    };
+
+    opts.btns = [
+        {
+            title: "分享到微博",
+            scheme: "sinaweibo://sendweibo?content=",
+            code: 3003
+        },
+        {title: "分享到私信", code: 1003},
+        {title: "分享到朋友圈", code: 1005},
+        {title: "分享到微信", code: 1004},
+        {title: "分享到QZone", code: 1011},
+        {title: "复制链接", code: 2002}
+    ];
+    custMenu(opts);
+  }
+
+  function custMenu(opts) {
+    //设置自定义菜单项
+    window.WeiboJSBridge.invoke('setMenuItems', {
+        items: opts.btns
+    });
+
+    //取消响应按钮动作，防止弹出两次私信菜单
+    window.WeiboJSBridge.on('menuItemSelected', function(res){});
+
+    if (window.WeiboJSBridge.off) {
+        window.WeiboJSBridge.off('menuItemSelected');
+    }
+
+    //响应按钮动作
+    window.WeiboJSBridge.on('menuItemSelected', function(res){
+      if (res.selected_code !== '1001' && Number(res.selected_code) < 3000) {
+        window.WeiboJSBridge.invoke('invokeMenuItem', {
+            code: res.selected_code
+        });
+      }
+
+      if (res.selected_code === '2002') {
+        //opts.alertMsg("复制成功!");
+      } else if (res.selected_code === '3003' || res.selected_code === 3003) {
+        //var weibo_content = opts.getShareContent();
+        window.location.href = "sinaweibo://sendweibo?content=" + (weibo_content || "");
+      } else if (res.selected_code === '3001' || res.selected_code === 3001) {
+        //doJumpPage('http://car.weibo.com/brand/FAQ');
+      }  else if (res.selected_code === '3002' || res.selected_code === 3002) {
+        //backToHome(createAction);
+      }
+    });
+
+    window.WeiboJSBridge.invoke('setSharingContent', {
+      external: opts.content
+    });
+  }
+
+</script>
